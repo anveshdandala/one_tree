@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// USER
+// clerkId  → Clerk's external id (lookup key)
+// id       → your internal UUID (used everywhere else)
+// ============================================================
+
+model User {
+  id          String   @id @default(uuid())
+  clerkId     String   @unique
+  createdAt   DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  branches    Branch[]
+
+  @@map("users")
+}
+
+// ============================================================
+// BRANCH
+// A domain / category (e.g. "Web Dev", "ML", "Fitness")
+// ============================================================
+
+model Branch {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  objective   String?      // "Become internship-ready"
+  color       String?      // hex color for visual identity on graph
+  icon        String?      // emoji or icon key
+
+  positionX   Float        @default(0)   // graph canvas position
+  positionY   Float        @default(0)
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  nodes       Node[]
+
+  @@map("branches")
+}
+
+// ============================================================
+// NODE  (Step)
+// A single learning step inside a branch
+// ============================================================
+
+model Node {
+  id          String      @id @default(uuid())
+  branchId    String
+  branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?     // short explanation shown on graph
+  content     String?     // full markdown canvas (the node workspace)
+
+  isCompleted Boolean     @default(false)
+  completedAt DateTime?
+
+  order       Int         @default(0)    // ordering within a branch
+
+  positionX   Float       @default(0)    // graph canvas position
+  positionY   Float       @default(0)
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // edges where this node is the source
+  outgoingEdges  Edge[]   @relation("EdgeSource")
+  // edges where this node is the target
+  incomingEdges  Edge[]   @relation("EdgeTarget")
+
+  resources   Resource[]
+  tags        NodeTag[]
+
+  @@map("nodes")
+}
+
+// ============================================================
+// EDGE  (Relationship)
+// Directed connection between two nodes (can cross branches)
+// ============================================================
+
+model Edge {
+  id          String    @id @default(uuid())
+
+  sourceId    String
+  source      Node      @relation("EdgeSource", fields: [sourceId], references: [id], onDelete: Cascade)
+
+  targetId    String
+  target      Node      @relation("EdgeTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  label       String?   // e.g. "prerequisite", "leads to", "related"
+  type        EdgeType  @default(PROGRESSION)
+
+  createdAt   DateTime  @default(now())
+
+  @@unique([sourceId, targetId])   // prevent duplicate edges
+  @@map("edges")
+}
+
+enum EdgeType {
+  PROGRESSION   // A → B means complete A before B
+  RELATED       // soft relationship, no strict order
+  DEPENDENCY    // B cannot start without A
+}
+
+// ============================================================
+// RESOURCE
+// Links, files, references attached to a node
+// ============================================================
+
+model Resource {
+  id        String       @id @default(uuid())
+  nodeId    String
+  node      Node         @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  title     String
+  url       String?
+  type      ResourceType @default(LINK)
+  notes     String?
+
+  createdAt DateTime     @default(now())
+
+  @@map("resources")
+}
+
+enum ResourceType {
+  LINK
+  VIDEO
+  ARTICLE
+  GITHUB
+  DOCUMENT
+  NOTE
+}
+
+// ============================================================
+// TAG
+// Reusable tags across nodes (e.g. "javascript", "python")
+// ============================================================
+
+model Tag {
+  id    String    @id @default(uuid())
+  name  String    @unique
+  nodes NodeTag[]
+
+  @@map("tags")
+}
+
+model NodeTag {
+  nodeId String
+  tagId  String
+  node   Node   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([nodeId, tagId])
+  @@map("node_tags")
+}

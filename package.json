@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "ui": "cd one_tree_ui && npm run dev",
+    "be": "cd one_tree_be && npm run dev",
+    "dev": "concurrently \"npm run ui\" \"npm run be\""
+  }
+}

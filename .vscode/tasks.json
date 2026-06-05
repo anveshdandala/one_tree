@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Backend",
+      "type": "shell",
+      "command": "node index.js",
+      "options": { "cwd": "${workspaceFolder}/one_tree_be" },
+      "presentation": { "panel": "new"}
+    },
+    {
+      "label": "Start Frontend",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/one_tree_ui" },
+      "presentation": { "panel": "new" }
+    },
+    {
+      "label": "Start Dev",
+      "dependsOn": ["Start Backend", "Start Frontend"],
+      "dependsOrder": "parallel",
+      "group": { "kind": "build", "isDefault": true }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "one_tree_be",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@clerk/backend": "^3.4.14",
+    "@clerk/clerk-sdk-node": "^4.13.23",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "prisma": "^7.8.0",
+    "sqlite": "^5.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1"
+  }
+}
