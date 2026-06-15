@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import Link from "next/link";
+import { useMemo, useState, useEffect } from "react";
+import { Pencil, Plus, X } from "lucide-react";
 import {
   ReactFlow,
   Background,
@@ -10,6 +11,7 @@ import {
   MiniMap,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import buildPreviewGraph from "./graphPreview";
 
 const fieldDefinitions = [
   {
@@ -45,6 +47,11 @@ export default function HomePageContent({ branches = [] }) {
   });
 
   const branchCount = branchList.length;
+  const {
+    nodes: reactFlowNodes,
+    edges: reactFlowEdges,
+    currentNode,
+  } = useMemo(() => buildPreviewGraph(branchList), [branchList]);
 
   const updateField = (field) => (event) => {
     setFormValues((currentValues) => ({
@@ -109,6 +116,27 @@ export default function HomePageContent({ branches = [] }) {
     }
   };
 
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const res = await fetch(`/api/branches`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+        if (!res.ok) {
+          throw new Error("Failed to fetch branches.");
+        }
+        const branches = await res.json();
+        setBranchList(branches);
+      } catch (error) {
+        console.error("Error fetching branches:", error);
+      }
+    };
+    fetchBranches();
+  }, []);
+
   return (
     <div className="relative flex min-h-[calc(100vh-64px)] w-full flex-col bg-canvas-bg font-sans text-canvas-text transition-colors duration-200">
       <div className="relative z-10 border-b border-canvas-border bg-canvas-secondary/90 px-6 py-3.5 backdrop-blur-sm">
@@ -141,34 +169,58 @@ export default function HomePageContent({ branches = [] }) {
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 px-4 py-5 sm:px-6 lg:px-8">
         <section className="flex min-h-[calc(100vh-168px)] flex-1 flex-col border border-canvas-border bg-canvas-card shadow-sm">
           <div className="flex items-center justify-between gap-4 border-b border-canvas-border px-4 py-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-canvas-text">
-              Viewing Window
-            </h2>
-            <span className="font-mono text-[9px] uppercase tracking-wider text-canvas-muted">
-              {branchCount} branches
-            </span>
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-canvas-text">
+                Graph Window
+              </h2>
+              <p className="mt-1 font-mono text-[9px] uppercase tracking-wider text-canvas-muted">
+                Viewing only
+              </p>
+            </div>
+            <Link
+              href="/home/graph"
+              className="inline-flex items-center gap-2 border border-canvas-inverse-bg bg-canvas-inverse-bg px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-canvas-inverse-text transition-all hover:opacity-90 active:scale-95"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              <span>Edit Graph</span>
+            </Link>
           </div>
 
-          <div className="flex flex-1 items-center justify-center bg-canvas-bg p-6">
-            <div className="text-center bg-secondary">
-              {/* React Flow Component Workspace */}
+          <div className="relative flex min-h-[620px] flex-1 bg-canvas-bg">
+            <div className="pointer-events-none absolute left-4 top-4 z-10 max-w-xs border border-canvas-border-strong bg-canvas-card/95 p-4 shadow-sm backdrop-blur-sm">
+              <span className="font-mono text-[8px] font-bold uppercase tracking-wider text-canvas-muted">
+                Current Node
+              </span>
+              <h3 className="mt-2 text-sm font-extrabold uppercase tracking-tight text-canvas-text">
+                {currentNode?.title || "Current Node"}
+              </h3>
+              <p className="mt-2 text-xs leading-5 text-canvas-muted">
+                {currentNode?.objective ||
+                  currentNode?.description ||
+                  "Your active node will appear here once the graph APIs are ready."}
+              </p>
+            </div>
+
+            <div className="h-full min-h-[620px] w-full">
               <ReactFlow
                 nodes={reactFlowNodes}
                 edges={reactFlowEdges}
-                nodeTypes={nodeTypes}
                 fitView
                 fitViewOptions={{ padding: 0.2 }}
                 nodesDraggable={false}
                 nodesConnectable={false}
-                elementsSelectable={true}
-                panOnScroll={true}
-                zoomOnDoubleClick={true}
+                elementsSelectable={false}
+                edgesFocusable={false}
+                nodesFocusable={false}
+                panOnDrag={false}
+                panOnScroll={false}
+                zoomOnScroll={false}
+                zoomOnPinch={false}
+                zoomOnDoubleClick={false}
                 minZoom={0.2}
                 maxZoom={1.5}
-                className="w-full h-full"
-                style={{ width: "100%", height: "100%", minHeight: "600px" }}
+                className="h-full w-full"
               >
-                {/* Abstract grids layer background */}
                 <Background
                   variant={BackgroundVariant.Lines}
                   color="var(--border-strong)"
@@ -176,7 +228,6 @@ export default function HomePageContent({ branches = [] }) {
                   size={1}
                 />
 
-                {/* Minimalist interactive viewport manipulation panels */}
                 <Controls
                   showInteractive={false}
                   className="!bg-canvas-card !border !border-canvas-border !shadow-md [&_button]:!bg-canvas-card [&_button]:!border-b [&_button]:!border-canvas-border [&_button]:!text-canvas-muted hover:[&_button]:!text-canvas-text [&_svg]:!fill-current"

@@ -1,16 +1,17 @@
 import "dotenv/config";
-
-console.log("DB URL exists:", !!process.env.DATABASE_URL);
-
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "./src/config/prisma.js";
 
 async function main() {
-  const result = await prisma.$queryRaw`SELECT 1`;
-  console.log(result);
+  try {
+    const result = await prisma.user.findMany();
+    console.log("Database model query successful:", result);
+  } catch (error) {
+    console.error("Database query failed:", error);
+  }
 }
 
 main()
   .catch(console.error)
   .finally(() => prisma.$disconnect());
+
+
