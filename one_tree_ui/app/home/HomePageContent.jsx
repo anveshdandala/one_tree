@@ -175,9 +175,6 @@ const INITIAL_EDGES = [
   },
 ];
 
-// ----------------------------------------------------------------------
-// CUSTOM REACTFLOW NODE COMPONENT
-// ----------------------------------------------------------------------
 const CustomNode = ({ data }) => {
   const {
     title,
@@ -252,9 +249,6 @@ const nodeTypes = {
   customNode: CustomNode,
 };
 
-// ----------------------------------------------------------------------
-// DERIVED STATE GENERATOR
-// ----------------------------------------------------------------------
 function branchesToFlow(branches, edges, onToggleCompleteNode) {
   const flowNodes = [];
 
@@ -707,9 +701,7 @@ export default function HomePageContent({
 
   return (
     <div className="flex h-[calc(100vh-73px)] w-full overflow-hidden bg-canvas-bg font-sans text-canvas-text transition-colors duration-200">
-      {/* ---------------------------------------------------------------- */}
-      {/* LEFT SIDEBAR: BRANCH & NODE LISTS                                */}
-      {/* ---------------------------------------------------------------- */}
+      {/* LEFT SIDEBAR: BRANCH & NODE LISTS*/}
       <div className="w-80 border-r border-canvas-border bg-canvas-card flex flex-col h-full overflow-hidden shrink-0">
         <div className="flex items-center justify-between border-b border-canvas-border px-5 py-4 shrink-0">
           <h3 className="text-xs font-extrabold uppercase tracking-widest text-canvas-text flex items-center gap-2">
@@ -822,9 +814,7 @@ export default function HomePageContent({
         </div>
       </div>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* CENTER VIEW: REACTFLOW CANVAS & VIEW PORT STATS                  */}
-      {/* ---------------------------------------------------------------- */}
+      {/* CENTER VIEW: REACTFLOW CANVAS & VIEW PORT STATS*/}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-canvas-bg">
         {/* Viewport Dashboard Header */}
         <div className="border-b border-canvas-border bg-canvas-card/50 px-6 py-3 shrink-0 flex items-center justify-between">

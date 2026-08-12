@@ -25,6 +25,7 @@ export default async function HomePage() {
   console.log("Sync response status:", syncResponse.status);
   const syncData = await syncResponse.json();
   console.log("local user id:", syncData.id);
+
   return (
     <div className="min-h-screen bg-canvas-bg font-sans text-canvas-text selection:bg-canvas-text/10 selection:text-canvas-text transition-colors duration-250">
       <header className="border-b border-canvas-border bg-canvas-bg/90 px-4 py-4 transition-colors duration-250 sm:px-6 lg:px-8">
